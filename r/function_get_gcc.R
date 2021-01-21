@@ -8,11 +8,11 @@ ROI.Date.func<-function(dd,n=length(ROIDates))
 }
 # modifed from Remko's function
 
-# fn <- 'pic/ng/9/WSCT1262.jpg'
-
 processImage.new <- function(fn, ROI=NULL){
   
   phot <- read_and_crop(fn,NULL)
+  
+  
   if(is.null(phot)){
     return(data.frame(filename=NA, GCC=NA, RCC=NA, BCC=NA, RGBtot=NA))
   }
@@ -27,8 +27,11 @@ processImage.new <- function(fn, ROI=NULL){
     phot <- phot[phot$x >= xmin & phot$x <= xmax &
                    phot$y >= ymin & phot$y <= ymax,]
   }
-  library(raster)
   
+  # filter out white pixels
+  phot[which(phot$R>.9&phot$G>.9&phot$B>.9),c('R','G','B')] <- 0
+  
+  # get GCC
   RDN <- mean(phot$R)
   GDN <- mean(phot$G)
   BDN <- mean(phot$B)
@@ -42,8 +45,6 @@ processImage.new <- function(fn, ROI=NULL){
   
   # Convention
   rgbtot <- bn * 255
-  
-  print(paste0(fn,' finished'))
   
   return(data.frame(filename=fn, GCC=GI, RCC=RI, BCC=BI, RGBtot=rgbtot))
 }
